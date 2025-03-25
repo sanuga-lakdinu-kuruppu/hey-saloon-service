@@ -1,4 +1,6 @@
 import { Otp } from "./otpModel.mjs";
+import { v4 as uuidv4 } from "uuid";
+import { User } from "./userModel.mjs";
 import { getEmailForOtp } from "../template/otpEmailTemplate.mjs";
 import AWS from "aws-sdk";
 const ses = new AWS.SES();
@@ -25,34 +27,67 @@ export const handleAuthRequest = async (data) => {
 };
 
 export const verifyOtp = async (data) => {
-  const foundOtps = await Otp.find({
-    email: data.email,
-  })
-    .sort({ createdAt: -1 })
-    .limit(1)
-    .exec();
+  if (data.type == "EMAIL_LOGIN") {
+    const foundOtps = await Otp.find({
+      email: data.email,
+    })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .exec();
 
-  if (!foundOtps || foundOtps.length == 0) return "1112";
+    if (!foundOtps || foundOtps.length == 0)
+      return {
+        res: "1112",
+      };
 
-  const foundOtp = foundOtps[0];
+    const foundOtp = foundOtps[0];
 
-  if (foundOtp.status === "VERIFIED") {
-    return "1113";
+    if (foundOtp.status === "VERIFIED") {
+      return {
+        res: "1113",
+      };
+    }
+
+    if (foundOtp.otp !== String(data.otp)) {
+      return {
+        res: "1114",
+      };
+    }
+
+    const newData = {
+      status: "VERIFIED",
+    };
+    await Otp.findByIdAndUpdate(foundOtp._id, newData, {
+      new: true,
+      runValidators: true,
+    });
+
+    const session = uuidv4();
+    const foundUser = await User.findOne({ email: data.email });
+    if (!foundUser) {
+      const user = {
+        userId: generateShortUuid(),
+        session: session,
+        email: data.email,
+        isEmailVerified: true,
+      };
+
+      const newUser = new User(user);
+      await newUser.save();
+    } else {
+      const newSession = {
+        session: session,
+      };
+      await User.findByIdAndUpdate(foundUser._id, newSession, {
+        new: true,
+        runValidators: true,
+      });
+    }
+    return {
+      res: "0000",
+      session: session,
+    };
   }
-
-  if (foundOtp.otp !== String(data.otp)) {
-    return "1114";
-  }
-
-  const newData = {
-    status: "VERIFIED",
-  };
-  await Otp.findByIdAndUpdate(foundOtp._id, newData, {
-    new: true,
-    runValidators: true,
-  });
-
-  return "0000";
 };
 
 const sendOtpEmail = async (to, body) => {
@@ -74,6 +109,10 @@ const sendOtpEmail = async (to, body) => {
   };
 
   const res = await ses.sendEmail(params).promise();
+};
+
+export const generateShortUuid = () => {
+  return Math.floor(10000000 + Math.random() * 90000000);
 };
 
 export const generateOtp = () => {

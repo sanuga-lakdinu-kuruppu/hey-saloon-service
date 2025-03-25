@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { handleAuthRequest, verifyOtp } from "./authService.mjs";
+import { verificationMiddleware } from "./verificationMiddleware.mjs";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.post("/auth/verify", async (request, response) => {
   try {
     const data = request.body;
 
-    const res = await verifyOtp(data);
+    const { res, session } = await verifyOtp(data);
 
     let object;
     if (res === "0000") {
@@ -47,9 +48,9 @@ router.post("/auth/verify", async (request, response) => {
         status: "0000",
         message: "verification sucess",
         data: {
-          accessToken: "mofaoqfntuabo2nall",
-          refreshToken: "mofaoqfntuabo2nall",
-          idToken: "mofaoqfntuabo2nall",
+          accessToken: session,
+          refreshToken: session,
+          idToken: session,
         },
       };
     } else if (res === "1112") {
