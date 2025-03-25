@@ -78,7 +78,7 @@ export const getEmailForOtp = (otp, email) => {
               </div>
               <div class="footer">
                   <p>&copy; 2025 Hey Saloon. All rights reserved.</p>
-                  <p><a href="https://yourwebsite.com">Visit our website</a> | <a href="mailto:support@slpe.online">Contact Support</a></p>
+                  <p><a href="https://yourwebsite.com">Visit our website</a> | <a href="mailto:support@theweb.asia">Contact Support</a></p>
               </div>
           </div>
       </body>
