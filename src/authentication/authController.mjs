@@ -1,4 +1,5 @@
 import { Router } from "express";
+import crypto from "crypto";
 import { handleAuthRequest, verifyOtp } from "./authService.mjs";
 import {
   CognitoIdentityProviderClient,
@@ -35,11 +36,18 @@ router.post("/auth/verify", async (request, response) => {
     if (res === "1112") {
       console.log("verification success");
 
+      const secretHash = generateSecretHash(
+        data.email,
+        "35mffojn6snjkivrpbep5u50rg",
+        "u7uki0ljp8m60gdgua5oi3da5h0f3runqbdmihdb1eu4ona5anb"
+      );
+
       const command = new InitiateAuthCommand({
         AuthFlow: "CUSTOM_AUTH",
         ClientId: "35mffojn6snjkivrpbep5u50rg",
         AuthParameters: {
           EMAIL: data.email,
+          SECRET_HASH: secretHash,
         },
       });
 
@@ -62,5 +70,13 @@ router.post("/auth/verify", async (request, response) => {
     return response.status(500).json({ error: "server error occred" });
   }
 });
+
+
+
+export const generateSecretHash = (username, clientId, clientSecret) => {
+  const hmac = crypto.createHmac("sha256", clientSecret);
+  hmac.update(`${username}${clientId}`);
+  return hmac.digest("base64");
+};
 
 export default router;
