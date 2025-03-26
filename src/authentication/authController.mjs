@@ -39,7 +39,7 @@ router.post("/auth/verify", async (request, response) => {
   try {
     const data = request.body;
 
-    const { res, session } = await verifyOtp(data);
+    const { res, session, role } = await verifyOtp(data);
 
     let object;
     if (res === "0000") {
@@ -51,6 +51,7 @@ router.post("/auth/verify", async (request, response) => {
           accessToken: session,
           refreshToken: session,
           idToken: session,
+          role: role,
         },
       };
     } else if (res === "1112") {

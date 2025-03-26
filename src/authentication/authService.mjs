@@ -75,6 +75,11 @@ export const verifyOtp = async (data) => {
 
       const newUser = new User(user);
       await newUser.save();
+      return {
+        res: "0000",
+        session: session,
+        role: user.role,
+      };
     } else {
       const newSession = {
         session: session,
@@ -83,11 +88,12 @@ export const verifyOtp = async (data) => {
         new: true,
         runValidators: true,
       });
+      return {
+        res: "0000",
+        session: session,
+        role: foundUser.role,
+      };
     }
-    return {
-      res: "0000",
-      session: session,
-    };
   }
 };
 
