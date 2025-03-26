@@ -68,6 +68,7 @@ export const verifyOtp = async (data) => {
       const user = {
         userId: generateShortUuid(),
         session: session,
+        role: "client",
         email: data.email,
         isEmailVerified: true,
       };
