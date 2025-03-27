@@ -1,6 +1,6 @@
 import { Otp } from "./otpModel.mjs";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "./userModel.mjs";
+import { User } from "../user/userModel.mjs";
 import { getEmailForOtp } from "../template/otpEmailTemplate.mjs";
 import AWS from "aws-sdk";
 const ses = new AWS.SES();
@@ -67,8 +67,10 @@ export const verifyOtp = async (data) => {
     if (!foundUser) {
       const user = {
         userId: generateShortUuid(),
-        session: session,
+        session: [session],
         role: "client",
+        imageUrl:
+          "https://i.pinimg.com/736x/f5/29/e2/f529e277826ba8aa2ad3dadc84eb8071.jpg",
         email: data.email,
         isEmailVerified: true,
       };
@@ -81,13 +83,14 @@ export const verifyOtp = async (data) => {
         role: user.role,
       };
     } else {
-      const newSession = {
-        session: session,
-      };
-      await User.findByIdAndUpdate(foundUser._id, newSession, {
-        new: true,
-        runValidators: true,
-      });
+      await User.findByIdAndUpdate(
+        foundUser._id,
+        { $push: { session: session } },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       return {
         res: "0000",
         session: session,

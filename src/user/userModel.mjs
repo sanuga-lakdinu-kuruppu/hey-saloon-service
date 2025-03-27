@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
     session: {
-      type: String,
+      type: [String],
     },
     createdAt: {
       type: Date,
@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     lastName: {
+      type: String,
+    },
+    imageUrl: {
       type: String,
     },
     email: {

@@ -1,4 +1,4 @@
-import { User } from "./userModel.mjs";
+import { User } from "../user/userModel.mjs";
 
 export const verificationMiddleware = async (request, response, next) => {
   console.log(request);
