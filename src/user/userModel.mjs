@@ -42,6 +42,9 @@ const userSchema = new mongoose.Schema(
     isMobileVerified: {
       type: Boolean,
     },
+    favouriteStylists: {
+      type: [Number],
+    },
   },
   {
     timestamps: true,

@@ -10,8 +10,8 @@ router.get("/user", verificationMiddleware, async (request, response) => {
       status: "0000",
       message: "user retrived successfully",
       data: {
-        firstname: user.firstname,
-        lastname: user.lastname,
+        firstName: user.firstName,
+        lastName: user.lastName,
         imageUrl: user.imageUrl,
       },
     });
