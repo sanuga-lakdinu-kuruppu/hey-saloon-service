@@ -8,7 +8,7 @@ router.get("/user", verificationMiddleware, async (request, response) => {
     const { user } = request;
     return response.send({
       status: "0000",
-      status: "user retrived successfully",
+      message: "user retrived successfully",
       data: {
         firstname: user.firstname,
         lastname: user.lastname,
