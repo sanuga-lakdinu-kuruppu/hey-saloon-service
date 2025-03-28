@@ -51,8 +51,10 @@ router.post("/stylists/create", async (request, response) => {
       thumbnailUrl: body.thumbnailUrl,
       imageUrl: body.imageUrl,
       saloonName: body.saloonName,
-      saloonLat: body.saloonLat,
-      saloonLog: body.saloonLog,
+      location: {
+        type: "Point",
+        coordinates: [body.saloonLog, body.saloonLat],
+      },
       rating: body.rating,
       totalRating: body.totalRating,
       isOpen: body.isOpen,
