@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { verificationMiddleware } from "../authentication/verificationMiddleware.mjs";
-import { getFavoriteStylists } from "./stylistService.mjs";
+import {
+  getFavoriteStylists,
+  getNearByStylists,
+  gettopRatedStylists,
+} from "./stylistService.mjs";
 import { User } from "../user/userModel.mjs";
 import { Stylist } from "./stylistModel.mjs";
 
@@ -17,6 +21,57 @@ router.get(
         status: "0000",
         message: "favorite stylists retrived successfully",
         data: favorites,
+      });
+    } catch (error) {
+      console.log(`error occured ${error}`);
+      return response.status(500).json({ error: "server error occred" });
+    }
+  }
+);
+
+router.get(
+  "/stylists/nearBy",
+  verificationMiddleware,
+  async (request, response) => {
+    try {
+      let { lat, log } = request.query;
+      const { user } = request;
+
+      if (!lat || !log) {
+        return response.send({
+          status: "0000",
+          message: "near by stylists retrived successfully",
+          data: [],
+        });
+      }
+
+      lat = parseFloat(lat);
+      log = parseFloat(log);
+
+      const near = await getNearByStylists(lat, log);
+      return response.send({
+        status: "0000",
+        message: "near by stylists retrived successfully",
+        data: near,
+      });
+    } catch (error) {
+      console.log(`error occured ${error}`);
+      return response.status(500).json({ error: "server error occred" });
+    }
+  }
+);
+
+router.get(
+  "/stylists/topRated",
+  verificationMiddleware,
+  async (request, response) => {
+    try {
+      const { user } = request;
+      const topRated = await gettopRatedStylists();
+      return response.send({
+        status: "0000",
+        message: "top rated stylists retrived successfully",
+        data: topRated,
       });
     } catch (error) {
       console.log(`error occured ${error}`);
