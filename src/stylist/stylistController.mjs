@@ -4,6 +4,7 @@ import {
   getFavoriteStylists,
   getNearByStylists,
   gettopRatedStylists,
+  getStylistById,
 } from "./stylistService.mjs";
 import { User } from "../user/userModel.mjs";
 import { Stylist } from "./stylistModel.mjs";
@@ -79,6 +80,51 @@ router.get(
     }
   }
 );
+
+router.post("/bookings", verificationMiddleware, async (request, response) => {
+  try {
+    const { body, user } = request;
+
+    const foundStylist = await Stylist.findOne({ stylistId: body.stylistId });
+
+    if (!foundStylist) {
+      return response.status(404).json({ error: "Stylist not found" });
+    }
+
+    let totalMinutes = 0;
+    let totalAmount = 0;
+    body.selectedServices.forEach((service) => {
+      totalMinutes += service.minutes || 0;
+      totalAmount += service.price || 0;
+    });
+
+    const booking = {
+      id: generateShortUuid(),
+      userId: user.userId,
+      bookingTime: new Date(),
+      queuedAt: (foundStylist.totalQueued || 0) + 1,
+      serviceAt: foundStylist.finishedAt,
+      serviceTime: totalMinutes,
+      bookingStatus: "QUEUED",
+      selectedServices: body.selectedServices,
+      serviceTotal: totalAmount,
+    };
+
+    foundStylist.bookings.push(booking);
+    foundStylist.totalQueued = booking.queuedAt;
+
+    await foundStylist.save();
+
+    return response.send({
+      status: "0000",
+      message: "Booking created",
+      data: booking,
+    });
+  } catch (error) {
+    console.error(`error occurred: ${error}`);
+    return response.status(500).json({ error: "Server error occurred" });
+  }
+});
 
 //temporary
 router.post("/stylists/create", async (request, response) => {

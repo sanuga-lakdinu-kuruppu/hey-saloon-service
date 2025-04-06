@@ -1,8 +1,6 @@
 import { Stylist } from "./stylistModel.mjs";
 
 export const getFavoriteStylists = async (user) => {
-  console.log(user);
-  console.log(user.favouriteStylists);
   const foundStylists = await Stylist.find({
     stylistId: { $in: user.favouriteStylists },
   });
@@ -28,4 +26,11 @@ export const getNearByStylists = async (lat, log) => {
 export const gettopRatedStylists = async () => {
   const top = await Stylist.find({}).sort({ rating: -1 }).limit(5);
   return top;
+};
+
+export const getStylistById = async (id) => {
+  const foundStylist = await Stylist.findOne({
+    stylistId: Number(id),
+  });
+  return foundStylist;
 };

@@ -85,7 +85,7 @@ const stylistSchema = new mongoose.Schema(
         price: {
           type: Number,
         },
-        time: {
+        minutes: {
           type: Number,
         },
       },
@@ -124,7 +124,7 @@ const stylistSchema = new mongoose.Schema(
             price: {
               type: Number,
             },
-            time: {
+            minutes: {
               type: Number,
             },
           },
