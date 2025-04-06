@@ -115,10 +115,23 @@ router.post("/bookings", verificationMiddleware, async (request, response) => {
 
     await foundStylist.save();
 
+    const thisBooking = {
+      bookingId: booking.id,
+      userId: booking.userId,
+      stylistId: foundStylist.stylistId,
+      bookingTime: booking.bookingTime,
+      queuedAt: booking.queuedAt,
+      serviceAt: booking.serviceAt,
+      serviceTime: booking.serviceTime,
+      bookingStatus: booking.bookingStatus,
+      selectedServices: booking.selectedServices,
+      serviceTotal: booking.serviceTotal,
+    };
+
     return response.send({
       status: "0000",
       message: "Booking created",
-      data: booking,
+      data: thisBooking,
     });
   } catch (error) {
     console.error(`error occurred: ${error}`);
