@@ -68,6 +68,8 @@ export const verifyOtp = async (data) => {
       const user = {
         userId: generateShortUuid(),
         session: [session],
+        firstName: "Guest",
+        lastName: "",
         role: "client",
         imageUrl:
           "https://i.pinimg.com/736x/f5/29/e2/f529e277826ba8aa2ad3dadc84eb8071.jpg",
@@ -81,6 +83,9 @@ export const verifyOtp = async (data) => {
         res: "0000",
         session: session,
         role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
       };
     } else {
       await User.findByIdAndUpdate(
@@ -95,6 +100,9 @@ export const verifyOtp = async (data) => {
         res: "0000",
         session: session,
         role: foundUser.role,
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        imageUrl: foundUser.imageUrl,
       };
     }
   }
