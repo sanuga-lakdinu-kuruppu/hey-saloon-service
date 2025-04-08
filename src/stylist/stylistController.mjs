@@ -157,7 +157,7 @@ router.get(
       const thisBooking = {
         bookingId: booking.id,
         userId: booking.userId,
-        stylistId: stylistId,
+        stylistId: Number(stylistId),
         bookingTime: booking.bookingTime,
         queuedAt: booking.queuedAt,
         serviceAt: booking.serviceAt,
