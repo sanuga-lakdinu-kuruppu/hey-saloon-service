@@ -23,6 +23,22 @@ export const getNearByStylists = async (lat, log) => {
   return nearbyStylists;
 };
 
+export const getBookingByStylistId = async (stylistId, userId) => {
+  const stylist = await Stylist.findOne({ stylistId });
+
+  if (!stylist) {
+    return "1111";
+  }
+
+  const booking = stylist.bookings.find((b) => b.userId === userId);
+
+  if (!booking) {
+    return "1111";
+  }
+
+  return booking;
+};
+
 export const gettopRatedStylists = async () => {
   const top = await Stylist.find({}).sort({ rating: -1 }).limit(5);
   return top;

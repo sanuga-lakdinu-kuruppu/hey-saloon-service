@@ -5,6 +5,7 @@ import {
   getNearByStylists,
   gettopRatedStylists,
   getStylistById,
+  getBookingByStylistId,
 } from "./stylistService.mjs";
 import { User } from "../user/userModel.mjs";
 import { Stylist } from "./stylistModel.mjs";
@@ -138,6 +139,44 @@ router.post("/bookings", verificationMiddleware, async (request, response) => {
     return response.status(500).json({ error: "Server error occurred" });
   }
 });
+
+router.get(
+  "/bookings/stylistId/:stylistId",
+  verificationMiddleware,
+  async (request, response) => {
+    try {
+      const { user } = request;
+      const { stylistId } = request.params;
+      const booking = await getBookingByStylistId(stylistId, user.userId);
+      if (booking === "1111") {
+        return response.send({
+          status: "1111",
+          message: "booking not found",
+        });
+      }
+      const thisBooking = {
+        bookingId: booking.id,
+        userId: booking.userId,
+        stylistId: stylistId,
+        bookingTime: booking.bookingTime,
+        queuedAt: booking.queuedAt,
+        serviceAt: booking.serviceAt,
+        serviceTime: booking.serviceTime,
+        bookingStatus: booking.bookingStatus,
+        selectedServices: booking.selectedServices,
+        serviceTotal: booking.serviceTotal,
+      };
+      return response.send({
+        status: "0000",
+        message: "booking found",
+        data: thisBooking,
+      });
+    } catch (error) {
+      console.log(`error occured ${error}`);
+      return response.status(500).json({ error: "server error occred" });
+    }
+  }
+);
 
 //temporary
 router.post("/stylists/create", async (request, response) => {
