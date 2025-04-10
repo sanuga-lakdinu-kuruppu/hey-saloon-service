@@ -11,7 +11,7 @@ export const getNearByStylists = async (lat, log) => {
   const nearbyStylists = await Stylist.aggregate([
     {
       $geoNear: {
-        near: { type: "Point", coordinates: [log, lat] },
+        near: { type: "Point", coordinates: [lat, log] },
         distanceField: "distance",
         maxDistance: 10000,
         spherical: true,
