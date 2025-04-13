@@ -3,12 +3,7 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema(
   {
     userId: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
-    session: {
-      type: [String],
+      type: String,
     },
     createdAt: {
       type: Date,
@@ -21,29 +16,26 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
     },
-    firstName: {
+    username: {
       type: String,
     },
-    lastName: {
+    password: {
       type: String,
     },
-    imageUrl: {
-      type: String,
+    firstLogin: {
+      type: Date,
     },
-    email: {
-      type: String,
+    lastLogin: {
+      type: Date,
     },
-    isEmailVerified: {
+    loginCount: {
+      type: Number,
+    },
+    isDisabled: {
       type: Boolean,
     },
-    mobile: {
-      type: String,
-    },
-    isMobileVerified: {
+    isDeleted: {
       type: Boolean,
-    },
-    favouriteStylists: {
-      type: [Number],
     },
   },
   {
