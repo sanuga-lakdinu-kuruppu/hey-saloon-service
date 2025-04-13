@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import AWS from "aws-sdk";
+const ses = new AWS.SES();
 
 export const generateOTP = () => {
   return Math.floor(1000 + Math.random() * 9000);
@@ -40,4 +42,25 @@ export const generateToken = (expireTime, payload, secret) => {
     expiresIn: expireTime,
   });
   return token;
+};
+
+export const sendEmail = async (to, subject, body) => {
+  const params = {
+    Source: process.env.FROM_EMAIL,
+    Destination: {
+      ToAddresses: [to],
+    },
+    Message: {
+      Subject: {
+        Data: subject,
+      },
+      Body: {
+        Html: {
+          Data: body,
+        },
+      },
+    },
+  };
+
+  await ses.sendEmail(params).promise();
 };

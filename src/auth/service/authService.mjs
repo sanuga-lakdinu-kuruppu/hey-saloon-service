@@ -6,10 +6,12 @@ import {
   generateRefreshToken,
   generateUniqueId,
   hashString,
+  sendEmail,
 } from "../../common/utility/commonUtility.mjs";
 import { OtpVerification } from "../model/otpVerificationModel.mjs";
 import { Client } from "../../client/model/clientModel.mjs";
 import { User } from "../../user/model/userModel.mjs";
+import { getEmailForLoginOtp } from "../../common/templates/emailTemplate.mjs";
 
 export const login = async (data) => {
   if (data.type === "EMAIL_LOGIN") {
@@ -38,7 +40,9 @@ export const login = async (data) => {
     const savingOtp = new OtpVerification(newOtpVerificationObj);
     const savedOtp = await savingOtp.save();
 
-    //need to send the email
+    const subject = "OTP Verification | Hey Saloon";
+    const emailBody = getEmailForLoginOtp(otp, email, subject);
+    await sendEmail(email, subject, emailBody);
 
     if (savedOtp) {
       return { res: RETURN_CODES.SUCCESS };
