@@ -64,3 +64,7 @@ export const sendEmail = async (to, subject, body) => {
 
   await ses.sendEmail(params).promise();
 };
+
+export const verifyRefreshToken = (token) => {
+  return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+};

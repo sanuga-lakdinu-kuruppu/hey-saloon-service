@@ -7,6 +7,7 @@ import {
   generateUniqueId,
   hashString,
   sendEmail,
+  verifyRefreshToken,
 } from "../../common/utility/commonUtility.mjs";
 import { OtpVerification } from "../model/otpVerificationModel.mjs";
 import { Client } from "../../client/model/clientModel.mjs";
@@ -59,6 +60,25 @@ export const verify = async (data) => {
     return await verifyEmailOtp(data);
   } else if (data.type === "MOBILE_LOGIN") {
     //need to handle the mobile login
+  }
+};
+
+export const getNewAccessToken = async (token) => {
+  try {
+    const payload = verifyRefreshToken(token);
+
+    const { accessToken, refreshToken } = getTokens(
+      payload.clientId,
+      payload.stylistId,
+      payload.role
+    );
+    return {
+      res: RETURN_CODES.SUCCESS,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
+  } catch (error) {
+    return { res: RETURN_CODES.UNAUTHORIED };
   }
 };
 
