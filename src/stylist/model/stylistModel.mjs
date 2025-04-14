@@ -16,6 +16,9 @@ const stylistSchema = new mongoose.Schema(
     saloonName: {
       type: String,
     },
+    thumbnailUrl: {
+      type: String,
+    },
     address: {
       no: {
         type: String,

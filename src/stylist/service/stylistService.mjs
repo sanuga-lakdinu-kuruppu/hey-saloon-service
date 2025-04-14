@@ -9,6 +9,76 @@ import {
 import { TempStylist } from "../model/tempStylistModel.mjs";
 import { getEmailForLoginOtp } from "../../common/templates/emailTemplate.mjs";
 import { Client } from "../../client/model/clientModel.mjs";
+import { Stylist } from "../model/stylistModel.mjs";
+
+export const updateStylistServices = async (stylistId, services) => {
+  const updatedServices = services.map((service) => {
+    return {
+      serviceId: generateUniqueId(),
+      serviceName: service.serviceName,
+      serviceCost: service.serviceCost,
+      serviceWillTake: service.serviceWillTake,
+    };
+  });
+  const newData = {
+    services: updatedServices,
+  };
+
+  let updatedStylist = await Stylist.findOneAndUpdate(
+    { stylistId: stylistId },
+    newData,
+    { new: true, runValidators: true }
+  );
+  updatedStylist = await getStylistById(stylistId);
+  return { res: RETURN_CODES.SUCCESS, stylist: updatedStylist };
+};
+
+export const updateStylistById = async (stylistId, data) => {
+  let newData = {};
+  if (data.saloonName) newData.saloonName = data.saloonName;
+  if (data.startTime) newData.startTime = data.startTime;
+  if (data.endTime) newData.endTime = data.endTime;
+  if (data.thumbnailUrl) newData.thumbnailUrl = data.thumbnailUrl;
+  if (data.address) {
+    newData.address = {};
+    if (data.address.no) newData.address.no = data.address.no;
+    if (data.address.address1) newData.address.address1 = data.address.address1;
+    if (data.address.address2) newData.address.address2 = data.address.address2;
+    if (data.address.address3) newData.address.address3 = data.address.address3;
+  }
+  if (data.location) {
+    const coordinates = [];
+
+    if (data.location.log) coordinates[0] = data.location.log;
+    if (data.location.lat) coordinates[1] = data.location.lat;
+
+    newData.location = {
+      type: "Point",
+      coordinates: coordinates,
+    };
+  }
+
+  let updatedStylist = await Stylist.findOneAndUpdate(
+    { stylistId: stylistId },
+    newData,
+    { new: true, runValidators: true }
+  );
+
+  updatedStylist = await getStylistById(stylistId);
+  return { res: RETURN_CODES.SUCCESS, stylist: updatedStylist };
+};
+
+export const getStylistById = async (stylistId) => {
+  const stylist = await Stylist.findOne({ stylistId: stylistId })
+    .select(
+      "stylistId createdAt updatedAt saloonName contact profileUrl startTime endTime location services thumbnailUrl totalQueued queueWillEnd totalReviewed currentRating -_id"
+    )
+    .populate({
+      path: "client",
+      select: "clientId name profileUrl favouriteStylists -_id",
+    });
+  return stylist;
+};
 
 export const createStylist = async (data) => {
   const firstName = data.firstName;

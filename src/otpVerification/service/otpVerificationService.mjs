@@ -87,6 +87,7 @@ export const verifyStylistRegistration = async (data) => {
           type: "Point",
           coordinates: [0, 0],
         },
+        thumbnailUrl: process.env.DEFAULT_THUMBNAIL_URL,
       };
 
       const savingStylist = new Stylist(newStylist);
@@ -135,6 +136,7 @@ export const verifyStylistRegistration = async (data) => {
           type: "Point",
           coordinates: [0, 0],
         },
+        thumbnailUrl: process.env.DEFAULT_THUMBNAIL_URL,
       };
 
       const savingStylist = new Stylist(newStylist);
