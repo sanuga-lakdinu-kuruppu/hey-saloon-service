@@ -23,15 +23,43 @@ export const compareHash = async (string1, string2) => {
   return await bcrypt.compare(string1, string2);
 };
 
-export const generateAccessToken = (clientId, stylistId, role) => {
-  const payload = { clientId: clientId, stylistId: stylistId, role: role };
+export const generateAccessToken = (
+  clientId,
+  stylistId,
+  role,
+  firstName,
+  lastName,
+  imageUrl
+) => {
+  const payload = {
+    clientId: clientId,
+    stylistId: stylistId,
+    role: role,
+    firstName: firstName,
+    lastName: lastName,
+    imageUrl: imageUrl,
+  };
   const expireTime = process.env.ACCESS_TOKEN_EXPIRES_IN;
   const secret = process.env.JWT_SECRET;
   return generateToken(expireTime, payload, secret);
 };
 
-export const generateRefreshToken = (clientId, stylistId, role) => {
-  const payload = { clientId: clientId, stylistId: stylistId, role: role };
+export const generateRefreshToken = (
+  clientId,
+  stylistId,
+  role,
+  firstName,
+  lastName,
+  imageUrl
+) => {
+  const payload = {
+    clientId: clientId,
+    stylistId: stylistId,
+    role: role,
+    firstName: firstName,
+    lastName: lastName,
+    imageUrl: imageUrl,
+  };
   const expireTime = process.env.REFRESH_TOKEN_EXPIRES_IN;
   const secret = process.env.JWT_REFRESH_SECRET;
   return generateToken(expireTime, payload, secret);

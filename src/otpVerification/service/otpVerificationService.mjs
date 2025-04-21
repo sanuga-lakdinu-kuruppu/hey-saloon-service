@@ -88,6 +88,7 @@ export const verifyStylistRegistration = async (data) => {
           coordinates: [0, 0],
         },
         thumbnailUrl: process.env.DEFAULT_THUMBNAIL_URL,
+        isOpen: false,
       };
 
       const savingStylist = new Stylist(newStylist);
@@ -137,6 +138,7 @@ export const verifyStylistRegistration = async (data) => {
           coordinates: [0, 0],
         },
         thumbnailUrl: process.env.DEFAULT_THUMBNAIL_URL,
+        isOpen: false,
       };
 
       const savingStylist = new Stylist(newStylist);
@@ -277,7 +279,10 @@ export const verifyEmailOtp = async (data) => {
   const { accessToken, refreshToken } = getTokens(
     currentClient.clientId,
     thisStylistId,
-    currentUser.role
+    currentUser.role,
+    currentClient.firstName,
+    currentClient.lastName,
+    currentClient.profileUrl
   );
 
   return {
@@ -287,8 +292,29 @@ export const verifyEmailOtp = async (data) => {
   };
 };
 
-export const getTokens = (clientId, stylistId, role) => {
-  const accessToken = generateAccessToken(clientId, stylistId, role);
-  const refreshToken = generateRefreshToken(clientId, stylistId, role);
+export const getTokens = (
+  clientId,
+  stylistId,
+  role,
+  firstName,
+  lastName,
+  imageUrl
+) => {
+  const accessToken = generateAccessToken(
+    clientId,
+    stylistId,
+    role,
+    firstName,
+    lastName,
+    imageUrl
+  );
+  const refreshToken = generateRefreshToken(
+    clientId,
+    stylistId,
+    role,
+    firstName,
+    lastName,
+    imageUrl
+  );
   return { accessToken, refreshToken };
 };

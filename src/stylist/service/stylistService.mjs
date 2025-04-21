@@ -11,6 +11,177 @@ import { getEmailForLoginOtp } from "../../common/templates/emailTemplate.mjs";
 import { Client } from "../../client/model/clientModel.mjs";
 import { Stylist } from "../model/stylistModel.mjs";
 
+export const getStylist = async (stylistId) => {
+  const foundStylist = await getStylistById(stylistId);
+  return { res: RETURN_CODES.SUCCESS, stylist: foundStylist };
+};
+
+export const getAllStylists = async (queryOn, lat, log, clientId) => {
+  if (queryOn === "nearBy") {
+    const currentLat = Number(lat);
+    const currentLog = Number(log);
+
+    const nearbyStylists = await Stylist.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [currentLog, currentLat] },
+          distanceField: "distance",
+          maxDistance: 10000,
+          spherical: true,
+        },
+      },
+      { $sort: { distance: 1 } },
+    ]);
+
+    const stylistIds = nearbyStylists.map((s) => s._id);
+
+    const populatedStylists = await Stylist.find({
+      _id: { $in: stylistIds },
+    }).populate({
+      path: "client",
+      select: "clientId name profileUrl contact favouriteStylists",
+    });
+
+    const requestedClient = await Client.findOne({ clientId });
+
+    const stylistMap = new Map();
+    populatedStylists.forEach((stylist) => {
+      stylistMap.set(String(stylist._id), stylist);
+    });
+    const result = nearbyStylists.map((s) => {
+      const fullStylist = stylistMap.get(String(s._id));
+
+      const isClientLiked = requestedClient
+        ? requestedClient.favouriteStylists?.includes(fullStylist.stylistId)
+        : false;
+
+      return {
+        stylistId: fullStylist.stylistId,
+        createdAt: fullStylist.createdAt,
+        updatedAt: fullStylist.updatedAt,
+        firstName: fullStylist.client?.name?.firstName || "",
+        lastName: fullStylist.client?.name?.lastName || "",
+        profileUrl: fullStylist.client?.profileUrl || "",
+        saloonName: fullStylist.saloonName,
+        thumbnailUrl: fullStylist.thumbnailUrl,
+        email: fullStylist.client?.contact?.email?.email,
+        mobile: fullStylist.client?.contact?.mobile?.mobile,
+        isOpen: fullStylist.isOpen,
+        distance: s.distance,
+        isClientLiked,
+        address: fullStylist.address,
+        location: fullStylist.location,
+        startTime: fullStylist.startTime,
+        endTime: fullStylist.endTime,
+        services: fullStylist.services,
+        totalQueued: fullStylist.totalQueued,
+        queueWillEnd: fullStylist.queueWillEnd,
+        totalReviewed: fullStylist.totalReviewed,
+        currentRating: fullStylist.currentRating,
+      };
+    });
+
+    return { res: RETURN_CODES.SUCCESS, stylists: result };
+  } else if (queryOn === "favourites") {
+    const requestedClient = await Client.findOne({ clientId });
+    const foundStylists = await Stylist.find({
+      stylistId: { $in: requestedClient.favouriteStylists },
+    }).populate({
+      path: "client",
+      select: "clientId name profileUrl contact favouriteStylists",
+    });
+
+    const result = foundStylists.map((stylist) => {
+      const isClientLiked = requestedClient
+        ? requestedClient.favouriteStylists?.includes(stylist.stylistId)
+        : false;
+
+      return {
+        stylistId: stylist.stylistId,
+        createdAt: stylist.createdAt,
+        updatedAt: stylist.updatedAt,
+        firstName: stylist.client?.name?.firstName,
+        lastName: stylist.client?.name?.lastName,
+        profileUrl: stylist.client?.profileUrl,
+        saloonName: stylist.saloonName,
+        thumbnailUrl: stylist.thumbnailUrl,
+        email: stylist.client?.contact?.email?.email,
+        mobile: stylist.client?.contact?.mobile?.mobile,
+        isOpen: stylist.isOpen,
+        distance: 0,
+        isClientLiked,
+        address: stylist.address,
+        location: stylist.location,
+        startTime: stylist.startTime,
+        endTime: stylist.endTime,
+        services: stylist.services,
+        totalQueued: stylist.totalQueued,
+        queueWillEnd: stylist.queueWillEnd,
+        totalReviewed: stylist.totalReviewed,
+        currentRating: stylist.currentRating,
+      };
+    });
+
+    return { res: RETURN_CODES.SUCCESS, stylists: result };
+  } else if (queryOn === "topRated") {
+    const requestedClient = await Client.findOne({ clientId });
+    const foundStylists = await Stylist.find({})
+      .populate({
+        path: "client",
+        select: "clientId name profileUrl contact favouriteStylists",
+      })
+      .sort({ currentRating: -1 })
+      .limit(5);
+
+    const result = foundStylists.map((stylist) => {
+      const isClientLiked = requestedClient
+        ? requestedClient.favouriteStylists?.includes(stylist.stylistId)
+        : false;
+
+      return {
+        stylistId: stylist.stylistId,
+        createdAt: stylist.createdAt,
+        updatedAt: stylist.updatedAt,
+        firstName: stylist.client?.name?.firstName,
+        lastName: stylist.client?.name?.lastName,
+        profileUrl: stylist.client?.profileUrl,
+        saloonName: stylist.saloonName,
+        thumbnailUrl: stylist.thumbnailUrl,
+        email: stylist.client?.contact?.email?.email,
+        mobile: stylist.client?.contact?.mobile?.mobile,
+        isOpen: stylist.isOpen,
+        distance: 0,
+        isClientLiked,
+        address: stylist.address,
+        location: stylist.location,
+        startTime: stylist.startTime,
+        endTime: stylist.endTime,
+        services: stylist.services,
+        totalQueued: stylist.totalQueued,
+        queueWillEnd: stylist.queueWillEnd,
+        totalReviewed: stylist.totalReviewed,
+        currentRating: stylist.currentRating,
+      };
+    });
+
+    return { res: RETURN_CODES.SUCCESS, stylists: result };
+  }
+};
+
+export const updateOpenStatus = async (stylistId, isOpen) => {
+  const newData = {
+    isOpen: isOpen,
+  };
+
+  let updatedStylist = await Stylist.findOneAndUpdate(
+    { stylistId: stylistId },
+    newData,
+    { new: true, runValidators: true }
+  );
+  updatedStylist = await getStylistById(stylistId);
+  return { res: RETURN_CODES.SUCCESS, stylist: updatedStylist };
+};
+
 export const updateStylistServices = async (stylistId, services) => {
   const updatedServices = services.map((service) => {
     return {
@@ -71,13 +242,40 @@ export const updateStylistById = async (stylistId, data) => {
 export const getStylistById = async (stylistId) => {
   const stylist = await Stylist.findOne({ stylistId: stylistId })
     .select(
-      "stylistId createdAt updatedAt saloonName contact profileUrl startTime endTime location services thumbnailUrl totalQueued queueWillEnd totalReviewed currentRating -_id"
+      "stylistId createdAt updatedAt saloonName isOpen  startTime endTime location services thumbnailUrl totalQueued queueWillEnd totalReviewed currentRating -_id"
     )
     .populate({
       path: "client",
-      select: "clientId name profileUrl favouriteStylists -_id",
+      select: "clientId name profileUrl contact favouriteStylists -_id",
     });
-  return stylist;
+
+  if (!stylist) return null;
+
+  const updatedStylist = {
+    stylistId: stylist.stylistId,
+    createdAt: stylist.createdAt,
+    updatedAt: stylist.updatedAt,
+    firstName: stylist.client?.name?.firstName,
+    lastName: stylist.client?.name?.lastName,
+    profileUrl: stylist.client?.profileUrl,
+    saloonName: stylist.saloonName,
+    thumbnailUrl: stylist.thumbnailUrl,
+    email: stylist.client?.contact?.email?.email,
+    mobile: stylist.client?.contact?.mobile?.mobile,
+    isOpen: stylist.isOpen,
+    distance: 0,
+    isClientLiked: false,
+    address: stylist.address,
+    location: stylist.location,
+    startTime: stylist.startTime,
+    endTime: stylist.endTime,
+    services: stylist.services,
+    totalQueued: stylist.totalQueued,
+    queueWillEnd: stylist.queueWillEnd,
+    totalReviewed: stylist.totalReviewed,
+    currentRating: stylist.currentRating,
+  };
+  return updatedStylist;
 };
 
 export const createStylist = async (data) => {

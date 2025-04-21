@@ -1,0 +1,64 @@
+import { Client } from "../../client/model/clientModel.mjs";
+import { generateUniqueId } from "../../common/utility/commonUtility.mjs";
+import { Stylist } from "../../stylist/model/stylistModel.mjs";
+import { Booking } from "../model/bookingModel.mjs";
+
+export const createBooking = async (data) => {
+  const foundStylist = await Stylist.findOne({ stylistId: data.stylistId });
+  if (!foundStylist) return { res: RETURN_CODES.SERVER_ERROR };
+
+  const foundClient = await Client.findOne({ clientId: data.clientId });
+  if (!foundClient) return { res: RETURN_CODES.SERVER_ERROR };
+
+  if (!data.servicesSelected || data.servicesSelected.length === 0)
+    return { res: RETURN_CODES.SERVER_ERROR };
+
+  const servicesSelected = data.servicesSelected;
+  const stylistServices = foundStylist.services;
+
+  let totalCost = 0;
+  let totalTime = 0;
+  let estimatedStarting;
+  const selectedServicesDetails = [];
+
+  servicesSelected.forEach((selectedId) => {
+    const service = stylistServices.find((s) => s.serviceId === selectedId);
+    if (service) {
+      totalCost += service.serviceCost || 0;
+      totalTime += service.serviceWillTake || 0;
+      selectedServicesDetails.push(service);
+    }
+  });
+
+  const queuedAt = foundStylist.totalQueued ? foundStylist.totalQueued + 1 : 1;
+  if (queuedAt === 0) {
+    estimatedStarting = new Date();
+  } else {
+    estimatedStarting = foundStylist.queueWillEnd
+      ? foundStylist.queueWillEnd
+      : new Date();
+  }
+
+  const newBooking = {
+    bookingId: generateUniqueId(),
+    stylist: foundStylist._id,
+    client: foundClient._id,
+    status: "QUEUED",
+    servicesSelected: selectedServicesDetails,
+    queuedAt: queuedAt,
+    serviceWillTake: totalTime,
+    estimatedStarting: estimatedStarting,
+    serviceTotal: totalCost,
+  };
+
+  const savingBooking = new Booking(newBooking);
+  const savedBooking = await savingBooking.save();
+
+  const queueWillEnd = new Date(
+    estimatedStarting.getTime() + totalTime * 60000
+  );
+
+  foundStylist.totalQueued = queuedAt;
+  foundStylist.queueWillEnd = queueWillEnd;
+  await foundStylist.save();
+};
