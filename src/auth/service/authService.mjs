@@ -62,7 +62,10 @@ export const getNewAccessToken = async (token) => {
     const { accessToken, refreshToken } = getTokens(
       payload.clientId,
       payload.stylistId,
-      payload.role
+      payload.role,
+      payload.firstName,
+      payload.lastName,
+      payload.imageUrl
     );
     return {
       res: RETURN_CODES.SUCCESS,
@@ -74,8 +77,29 @@ export const getNewAccessToken = async (token) => {
   }
 };
 
-export const getTokens = (clientId, stylistId, role) => {
-  const accessToken = generateAccessToken(clientId, stylistId, role);
-  const refreshToken = generateRefreshToken(clientId, stylistId, role);
+export const getTokens = (
+  clientId,
+  stylistId,
+  role,
+  firstName,
+  lastName,
+  imageUrl
+) => {
+  const accessToken = generateAccessToken(
+    clientId,
+    stylistId,
+    role,
+    firstName,
+    lastName,
+    imageUrl
+  );
+  const refreshToken = generateRefreshToken(
+    clientId,
+    stylistId,
+    role,
+    firstName,
+    lastName,
+    imageUrl
+  );
   return { accessToken, refreshToken };
 };
