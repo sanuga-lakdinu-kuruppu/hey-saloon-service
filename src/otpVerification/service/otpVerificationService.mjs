@@ -280,8 +280,8 @@ export const verifyEmailOtp = async (data) => {
     currentClient.clientId,
     thisStylistId,
     currentUser.role,
-    currentClient.firstName,
-    currentClient.lastName,
+    currentClient.name.firstName,
+    currentClient.name.lastName,
     currentClient.profileUrl
   );
 
