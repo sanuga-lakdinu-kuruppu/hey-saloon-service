@@ -43,7 +43,7 @@ export const protectRoute = (allowedRoles = []) => {
       if (client.user.role === "STYLIST") req.stylistId = payload.stylistId;
       next();
     } catch (err) {
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return res.status(498).json({ message: "Invalid or expired token" });
     }
   };
 };
