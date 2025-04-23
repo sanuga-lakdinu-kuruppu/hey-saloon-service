@@ -1,4 +1,5 @@
 import { Client } from "../../client/model/clientModel.mjs";
+import { RETURN_CODES } from "../../common/error/returnCodes.mjs";
 import { generateUniqueId } from "../../common/utility/commonUtility.mjs";
 import { Stylist } from "../../stylist/model/stylistModel.mjs";
 import { Booking } from "../model/bookingModel.mjs";
@@ -61,4 +62,6 @@ export const createBooking = async (data) => {
   foundStylist.totalQueued = queuedAt;
   foundStylist.queueWillEnd = queueWillEnd;
   await foundStylist.save();
+
+  return {res: RETURN_CODES.SUCCESS, booking: savedBooking}
 };
