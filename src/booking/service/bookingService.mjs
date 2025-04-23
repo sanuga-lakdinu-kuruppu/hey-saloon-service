@@ -4,6 +4,53 @@ import { generateUniqueId } from "../../common/utility/commonUtility.mjs";
 import { Stylist } from "../../stylist/model/stylistModel.mjs";
 import { Booking } from "../model/bookingModel.mjs";
 
+export const getAllBookings = async (clientId, status = "QUEUED") => {
+  const foundClient = await Client.findOne({ clientId: clientId });
+  if (!foundClient) return { res: RETURN_CODES.SERVER_ERROR };
+
+  const bookings = await Booking.find({
+    client: foundClient._id,
+    status,
+  })
+    .populate({
+      path: "stylist",
+      populate: {
+        path: "client",
+        model: "Client",
+      },
+    })
+    .populate("client");
+
+  const formattedBookings = bookings.map((booking) => {
+    const stylist = booking.stylist;
+    const stylistClient = stylist?.client;
+
+    return {
+      bookingId: booking.bookingId,
+      bookingTime: booking.createdAt,
+      status: booking.status,
+      servicesSelected: booking.servicesSelected,
+      queuedAt: booking.queuedAt,
+      serviceWillTake: booking.serviceWillTake,
+      estimatedStarting: booking.estimatedStarting,
+      serviceTotal: booking.serviceTotal,
+      stylist: {
+        stylistId: stylist?.stylistId,
+        firstName: stylistClient?.name?.firstName || "",
+        lastName: stylistClient?.name?.lastName || "",
+        saloonName: stylist?.saloonName,
+        location: stylist?.location,
+        totalReviewed: stylist?.totalReviewed,
+        currentRating: stylist?.currentRating,
+        profileUrl: stylistClient?.profileUrl || "",
+      },
+      client: booking.client,
+    };
+  });
+
+  return { res: RETURN_CODES.SUCCESS, bookings: formattedBookings };
+};
+
 export const createBooking = async (data) => {
   const foundStylist = await Stylist.findOne({
     stylistId: data.stylistId,
