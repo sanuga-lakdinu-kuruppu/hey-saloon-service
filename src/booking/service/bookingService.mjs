@@ -5,7 +5,12 @@ import { Stylist } from "../../stylist/model/stylistModel.mjs";
 import { Booking } from "../model/bookingModel.mjs";
 
 export const createBooking = async (data) => {
-  const foundStylist = await Stylist.findOne({ stylistId: data.stylistId });
+  const foundStylist = await Stylist.findOne({
+    stylistId: data.stylistId,
+  }).populate({
+    path: "client",
+    select: "clientId name profileUrl contact favouriteStylists",
+  });
   if (!foundStylist) return { res: RETURN_CODES.SERVER_ERROR };
 
   const foundClient = await Client.findOne({ clientId: data.clientId });
@@ -74,8 +79,17 @@ export const createBooking = async (data) => {
       serviceWillTake: savedBooking.serviceWillTake,
       estimatedStarting: savedBooking.estimatedStarting,
       serviceTotal: savedBooking.serviceTotal,
-      stylistId: foundStylist.stylistId,
-      clientId: foundClient.clientId,
+      stylist: {
+        stylistId: foundStylist.stylistId,
+        firstName: foundStylist.client?.name.firstName,
+        lastName: foundStylist.client?.name.lastName,
+        saloonName: foundStylist.saloonName,
+        location: foundStylist.location,
+        totalReviewed: foundStylist.totalReviewed,
+        currentRating: foundStylist.currentRating,
+        profileUrl: foundStylist.client?.profileUrl || "",
+      },
+      client: foundClient,
     },
   };
 };
