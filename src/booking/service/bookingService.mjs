@@ -63,5 +63,17 @@ export const createBooking = async (data) => {
   foundStylist.queueWillEnd = queueWillEnd;
   await foundStylist.save();
 
-  return {res: RETURN_CODES.SUCCESS, booking: savedBooking}
+  return {
+    res: RETURN_CODES.SUCCESS,
+    booking: {
+      bookingId: savedBooking.bookingId,
+      bookingTime: savedBooking.createdAt,
+      status: savedBooking.status,
+      servicesSelected: savedBooking.servicesSelected,
+      queuedAt: savedBooking.queuedAt,
+      serviceWillTake: savedBooking.serviceWillTake,
+      estimatedStarting: savedBooking.estimatedStarting,
+      serviceTotal: savedBooking.serviceTotal,
+    },
+  };
 };
