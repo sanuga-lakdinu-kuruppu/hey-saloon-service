@@ -74,6 +74,8 @@ export const createBooking = async (data) => {
       serviceWillTake: savedBooking.serviceWillTake,
       estimatedStarting: savedBooking.estimatedStarting,
       serviceTotal: savedBooking.serviceTotal,
+      stylistId: foundStylist.stylistId,
+      clientId: foundClient.clientId,
     },
   };
 };
