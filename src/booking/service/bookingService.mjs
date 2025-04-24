@@ -11,9 +11,9 @@ const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
 });
 
 export const updateBookingStatus = async (bookingId, status) => {
-  const booking = await Booking.findOne({ bookingId: bookingId }).populate(
-    "client"
-  );
+  const booking = await Booking.findOne({ bookingId: bookingId })
+    .populate("client")
+    .populate("stylist");
   if (!booking) return { res: RETURN_CODES.SERVER_ERROR };
 
   booking.status = status;
@@ -38,9 +38,31 @@ const sendNotification = async (booking) => {
     return;
   }
 
+  const passBooking = {
+    bookingId: booking.bookingId,
+    bookingTime: booking.createdAt,
+    status: booking.status,
+    servicesSelected: booking.servicesSelected,
+    queuedAt: booking.queuedAt,
+    serviceWillTake: booking.serviceWillTake,
+    estimatedStarting: booking.estimatedStarting,
+    serviceTotal: booking.serviceTotal,
+    stylist: {
+      stylistId: booking.stylist.stylistId,
+      firstName: booking.client?.name.firstName,
+      lastName: booking.client?.name.lastName,
+      saloonName: booking.stylist?.saloonName,
+      location: booking.stylist?.location,
+      totalReviewed: booking.stylist?.totalReviewed,
+      currentRating: booking.stylist?.currentRating,
+      profileUrl: booking.stylist?.client?.profileUrl || "",
+    },
+    client: booking.client,
+  };
+
   const message = {
     type: booking.status,
-    content: "notifcation from the server",
+    booking: passBooking,
   };
 
   const params = {
