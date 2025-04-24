@@ -7,7 +7,7 @@ import { Connection } from "../../common/connection/connectionModel.mjs";
 import AWS from "aws-sdk";
 
 const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
-  endpoint: "wss://io6nqs6reh.execute-api.ap-southeast-1.amazonaws.com/prod",
+  endpoint: "https://io6nqs6reh.execute-api.ap-southeast-1.amazonaws.com/prod",
 });
 
 export const updateBookingStatus = async (bookingId, status) => {
@@ -20,7 +20,11 @@ export const updateBookingStatus = async (bookingId, status) => {
   await booking.save();
 
   if (status !== "CANCELLED") {
-    await sendNotification(booking);
+    try {
+      await sendNotification(booking);
+    } catch (error) {
+      console.log(`error occured ${error}`);
+    }
   }
   return { res: RETURN_CODES.SUCCESS, updatedBooking: booking };
 };
