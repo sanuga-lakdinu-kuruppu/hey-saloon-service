@@ -3,6 +3,49 @@ import { RETURN_CODES } from "../../common/error/returnCodes.mjs";
 import { generateUniqueId } from "../../common/utility/commonUtility.mjs";
 import { Stylist } from "../../stylist/model/stylistModel.mjs";
 import { Booking } from "../model/bookingModel.mjs";
+import { Connection } from "../../common/connection/connectionModel.mjs";
+import AWS from "aws-sdk";
+
+const apiGatewayManagementApi = new AWS.ApiGatewayManagementApi({
+  endpoint: "wss://io6nqs6reh.execute-api.ap-southeast-1.amazonaws.com/prod",
+});
+
+export const updateBookingStatus = async (bookingId, status) => {
+  const booking = await Booking.findOne({ bookingId: bookingId }).populate(
+    "client"
+  );
+  if (!booking) return { res: RETURN_CODES.SERVER_ERROR };
+
+  booking.status = status;
+  await booking.save();
+
+  if (status !== "CANCELLED") {
+    await sendNotification(booking);
+  }
+  return { res: RETURN_CODES.SUCCESS, updatedBooking: booking };
+};
+
+const sendNotification = async (booking) => {
+  const foundConnection = await Connection.findOne({
+    clientId: booking.client.clientId,
+  });
+
+  if (!foundConnection) {
+    return;
+  }
+
+  const message = {
+    type: booking.status,
+    content: "notifcation from the server",
+  };
+
+  const params = {
+    ConnectionId: foundConnection.connectionId,
+    Data: JSON.stringify(message),
+  };
+
+  await apiGatewayManagementApi.postToConnection(params).promise();
+};
 
 export const getAllBookings = async (clientId, status = "QUEUED") => {
   const foundClient = await Client.findOne({ clientId: clientId });

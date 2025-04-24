@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { RETURN_CODES } from "../../common/error/returnCodes.mjs";
-import { createBooking, getAllBookings } from "../service/bookingService.mjs";
+import {
+  createBooking,
+  getAllBookings,
+  updateBookingStatus,
+} from "../service/bookingService.mjs";
 import { protectRoute } from "../../auth/middleware/authMiddleware.mjs";
 
 const router = Router();
@@ -48,6 +52,38 @@ router.get(
     } catch (error) {
       console.log(`error occured ${error}`);
       return response.status(500).json({ error: "server error occured" });
+    }
+  }
+);
+
+router.patch(
+  "/bookings/:bookingId/status",
+  // protectRoute(["STYLIST", "CLIENT"]),
+  async (request, response) => {
+    try {
+      const { bookingId } = request.params;
+      const { status } = request.body;
+
+      if (!["STARTED", "COMPLETED", "PADI", "CANCELLED"].includes(status)) {
+        return response.status(400).json({ error: "Invalid status" });
+      }
+
+      const { res, updatedBooking } = await updateBookingStatus(
+        bookingId,
+        status
+      );
+
+      if (res === RETURN_CODES.SUCCESS) {
+        return response.send({
+          message: "booking status updated successfully",
+          data: updatedBooking,
+        });
+      } else {
+        return response.status(500).json({ error: "server error occurred" });
+      }
+    } catch (error) {
+      console.log(`error occurred ${error}`);
+      return response.status(500).json({ error: "server error occurred" });
     }
   }
 );
