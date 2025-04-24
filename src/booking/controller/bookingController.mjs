@@ -64,7 +64,7 @@ router.patch(
       const { bookingId } = request.params;
       const { status } = request.body;
 
-      if (!["STARTED", "COMPLETED", "PADI", "CANCELLED"].includes(status)) {
+      if (!["STARTED", "COMPLETED", "PAID", "CANCELLED"].includes(status)) {
         return response.status(400).json({ error: "Invalid status" });
       }
 
