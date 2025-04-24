@@ -55,7 +55,7 @@ const sendNotification = async (booking) => {
       location: booking.stylist?.location,
       totalReviewed: booking.stylist?.totalReviewed,
       currentRating: booking.stylist?.currentRating,
-      profileUrl: booking.stylist?.client?.profileUrl || "",
+      profileUrl: booking.stylist?.thumbnailUrl || "",
     },
     client: booking.client,
   };
